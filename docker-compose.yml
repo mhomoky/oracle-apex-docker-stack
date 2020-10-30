@@ -2,10 +2,10 @@ version: '3'
 
 # ------------------------------------------------------------------------------
 # These images must be built in advance, or docker-compose will build them.
-# cd database/ol7_19
+# cd ol7_19
 # docker build -t ol7_19:latest .
 # 
-# cd ords/ol7_ords
+# cd ol7_ords
 # docker build -t ol7_ords:latest .
 #
 # Run it.
