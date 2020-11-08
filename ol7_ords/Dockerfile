@@ -26,9 +26,9 @@ LABEL maintainer="reybis@prinsoft.do"
 # Define fixed (build time) environment variables.
 ENV JAVA_SOFTWARE="OpenJDK11U-jdk_x64_linux_hotspot_11.0.9_11.tar.gz"          \
     TOMCAT_SOFTWARE="apache-tomcat-9.0.39.tar.gz"                              \
-    ORDS_SOFTWARE="ords-20.2.1.227.0350.zip"                                   \
-    APEX_SOFTWARE="apex_20.2.zip"                                           \ 
-    SQLCL_SOFTWARE="sqlcl-20.2.0.174.1557.zip"                                 \
+    ORDS_SOFTWARE="ords-20.3.0.301.1819.zip"                                   \
+    APEX_SOFTWARE="apex_20.2.zip"                                              \ 
+    SQLCL_SOFTWARE="sqlcl-20.3.0.274.1916.zip"                                 \
     SOFTWARE_DIR="/u01/software"                                               \
     SCRIPTS_DIR="/u01/scripts"                                                 \
     KEYSTORE_DIR="/u01/keystore"                                               \
