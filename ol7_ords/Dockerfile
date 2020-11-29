@@ -25,7 +25,7 @@ LABEL maintainer="reybis@prinsoft.do"
 # ------------------------------------------------------------------------------
 # Define fixed (build time) environment variables.
 ENV JAVA_SOFTWARE="OpenJDK11U-jdk_x64_linux_hotspot_11.0.9_11.tar.gz"          \
-    TOMCAT_SOFTWARE="apache-tomcat-9.0.39.tar.gz"                              \
+    TOMCAT_SOFTWARE="apache-tomcat-9.0.40.tar.gz"                              \
     ORDS_SOFTWARE="ords-20.3.0.301.1819.zip"                                   \
     APEX_SOFTWARE="apex_20.2.zip"                                              \ 
     SQLCL_SOFTWARE="sqlcl-20.3.0.274.1916.zip"                                 \
@@ -53,7 +53,7 @@ ENV DB_HOSTNAME="ol7-183.localdomain"                                          \
     KEYSTORE_PASSWORD="KeystorePassword1"                                      \
     AJP_SECRET="AJPSecret1"                                                    \
     AJP_ADDRESS="::1"                                                          \
-    APEX_IMAGES_REFRESH="false"                                                \
+    APEX_IMAGES_REFRESH="true"                                                \
     PROXY_IPS="123.123.123.123\|123.123.123.124"
 
 # ------------------------------------------------------------------------------
