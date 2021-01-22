@@ -33,7 +33,7 @@ function check_db {
 SET PAGESIZE 0 FEEDBACK OFF VERIFY OFF HEADING OFF ECHO OFF TAB OFF
 SELECT 'Alive' FROM dual;
 EXIT;
-EOF`
+EOF `
 
   RETVAL="${RETVAL//[$'\t\r\n']}"
   if [ "${RETVAL}" = "Alive" ]; then
@@ -47,8 +47,8 @@ CONNECTION="APEX_PUBLIC_USER/${APEX_PUBLIC_USER_PASSWORD}@//${DB_HOSTNAME}:${DB_
 check_db ${CONNECTION}
 while [ ${DB_OK} -eq 1 ]
 do
-  echo "DB not available yet. Waiting for 30 seconds."
-  sleep 30
+  echo "DB not available yet. Waiting for 15 seconds."
+  sleep 15
   check_db ${CONNECTION}
 done
 
@@ -132,7 +132,7 @@ if [ ! -f ${KEYSTORE_DIR}/keystore.jks ]; then
   mkdir -p ${KEYSTORE_DIR}
   cd ${KEYSTORE_DIR}
   ${JAVA_HOME}/bin/keytool -genkey -keyalg RSA -alias selfsigned -keystore keystore.jks \
-     -dname "CN=${HOSTNAME}, OU=My Department, O=My Company, L=Birmingham, ST=West Midlands, C=GB" \
+     -dname "CN=${HOSTNAME}, OU=My Department, O=My Company, L=Wilmslow, ST=Cheshire, C=GB" \
      -storepass ${KEYSTORE_PASSWORD} -validity 3600 -keysize 2048 -keypass ${KEYSTORE_PASSWORD}
 
   sed -i -e "s|###KEYSTORE_DIR###|${KEYSTORE_DIR}|g" ${SCRIPTS_DIR}/server.xml

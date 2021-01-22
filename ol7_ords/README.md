@@ -25,10 +25,10 @@ Due to licensing restrictions I can't host these files in Github or elsewhere.
 
 As such, you'll need to download them manually. Download the following files and store them in the `software` folder.
 - [apex_20.2.zip](http://www.oracle.com/technetwork/developer-tools/apex/downloads/index.html)
-- [apache-tomcat-9.0.39.tar.gz](https://tomcat.apache.org/download-90.cgi)
-- [OpenJDK11U-jdk_x64_linux_hotspot_11.0.9_11.tar.gz](https://adoptopenjdk.net/releases.html?variant=openjdk11&jvmVariant=hotspot)
-- [ords-20.2.1.227.0350.zip](http://www.oracle.com/technetwork/developer-tools/rest-data-services/downloads/index.html)
-- [sqlcl-20.2.0.174.1557.zip](http://www.oracle.com/technetwork/developer-tools/sqlcl/downloads/index.html)
+- [apache-tomcat-9.0.41.tar.gz](https://tomcat.apache.org/download-90.cgi)
+- [OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz](https://adoptopenjdk.net/releases.html?variant=openjdk11&jvmVariant=hotspot)
+- [ords-20.4.1.013.1644.zip](http://www.oracle.com/technetwork/developer-tools/rest-data-services/downloads/index.html)
+- [sqlcl-20.4.1.351.1718.zip](http://www.oracle.com/technetwork/developer-tools/sqlcl/downloads/index.html)
 
 ## Directory structure
 Directory contents when software is included.
@@ -44,12 +44,12 @@ Directory contents when software is included.
 │   ├── server.xml
 │   └── start.sh
 └── software
-    ├── apache-tomcat-9.0.39.tar.gz
+    ├── apache-tomcat-9.0.41.tar.gz
     ├── apex_20.2.zip
-    ├── OpenJDK11U-jdk_x64_linux_hotspot_11.0.9_11.tar.gz
-    ├── ords-20.2.1.227.0350.zip
+    ├── OpenJDK11U-jdk_x64_linux_hotspot_11.0.10_9.tar.gz
+    ├── ords-20.4.1.013.1644.zip
     ├── put_software_here.txt
-    └── sqlcl-20.2.0.174.1557.zip
+    └── sqlcl-20.4.1.351.1718.zip
 ```
 
 ## Persistent Storage
