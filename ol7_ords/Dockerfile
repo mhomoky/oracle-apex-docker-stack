@@ -78,6 +78,7 @@ HEALTHCHECK --interval=1m --start-period=1m \
 # ------------------------------------------------------------------------------
 # The start script performs all config based on runtime environment variables,
 # and starts tomcat.
-CMD exec ${SCRIPTS_DIR}/start.sh
+# CMD exec ${SCRIPTS_DIR}/start.sh
+CMD ["${SCRIPTS_DIR}/start.sh"]
 
 # End

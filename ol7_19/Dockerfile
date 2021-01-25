@@ -54,13 +54,14 @@ COPY scripts/* ${SCRIPTS_DIR}/
 # high IDs, which causes issues. Note 2 on link below.
 # https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user
 #
+    # yum -y update                                                           && \
 RUN groupadd -g 500 dba                                                     && \
     groupadd -g 501 oinstall                                                && \
     groupadd -g 1042 docker_fg                                              && \
     useradd -d /home/oracle -u 500 -g dba -G oinstall,dba,docker_fg -m -s /bin/bash oracle   && \
     yum -y install unzip tar gzip                                           && \
-    yum -y update                                                           && \
     yum -y install oracle-database-preinstall-19c                           && \
+    yum clean all                                                           && \
     rm -Rf /var/cache/yum                                                   && \
     mkdir -p ${ORACLE_HOME}                                                 && \
     mkdir -p /u02/oradata                                                   && \
@@ -74,21 +75,21 @@ RUN groupadd -g 500 dba                                                     && \
 USER oracle
 
 # Unzip software
-RUN cd ${ORACLE_HOME}                                                       && \
-    unzip -oq ${SOFTWARE_DIR}/${DB_SOFTWARE}                                && \
-    rm -f ${SOFTWARE_DIR}/${DB_SOFTWARE}
+WORKDIR "${ORACLE_HOME}"
+RUN unzip -oq "${SOFTWARE_DIR}/${DB_SOFTWARE}"                                && \
+    rm -f "${SOFTWARE_DIR}/${DB_SOFTWARE}"
 
 # Do software-only installation
-RUN ${ORACLE_HOME}/runInstaller -ignorePrereq                                  \
+RUN "${ORACLE_HOME}"/runInstaller -ignorePrereq                                  \
     -waitforcompletion -silent                                                 \
-    -responseFile ${ORACLE_HOME}/install/response/db_install.rsp               \
+    -responseFile "${ORACLE_HOME}"/install/response/db_install.rsp               \
     oracle.install.option=INSTALL_DB_SWONLY                                    \
     ORACLE_HOSTNAME=${HOSTNAME}                                                \
     UNIX_GROUP_NAME=oinstall                                                   \
-    INVENTORY_LOCATION=${ORA_INVENTORY}                                        \
+    INVENTORY_LOCATION="${ORA_INVENTORY}"                                        \
     SELECTED_LANGUAGES=en,en_GB                                                \
-    ORACLE_HOME=${ORACLE_HOME}                                                 \
-    ORACLE_BASE=${ORACLE_BASE}                                                 \
+    ORACLE_HOME="${ORACLE_HOME}"                                                 \
+    ORACLE_BASE="${ORACLE_BASE}"                                                 \
     oracle.install.db.InstallEdition=EE                                        \
     oracle.install.db.OSDBA_GROUP=dba                                          \
     oracle.install.db.OSBACKUPDBA_GROUP=dba                                    \
@@ -99,15 +100,15 @@ RUN ${ORACLE_HOME}/runInstaller -ignorePrereq                                  \
     DECLINE_SECURITY_UPDATES=true; exit 0
 
 # Replace default APEX software with user-provided version.
-RUN rm -Rf ${ORACLE_HOME}/apex                                              && \
-    unzip -oqd ${ORACLE_HOME} ${SOFTWARE_DIR}/${APEX_SOFTWARE}              && \
-    rm ${SOFTWARE_DIR}/${APEX_SOFTWARE}
+RUN rm -Rf "${ORACLE_HOME}"/apex                                              && \
+    unzip -oqd "${ORACLE_HOME}" "${SOFTWARE_DIR}/${APEX_SOFTWARE}"              && \
+    rm "${SOFTWARE_DIR}/${APEX_SOFTWARE}"
 
 # Run the root scripts
 USER root
 
-RUN sh ${ORA_INVENTORY}/orainstRoot.sh                                      && \
-    sh ${ORACLE_HOME}/root.sh
+RUN sh "${ORA_INVENTORY}"/orainstRoot.sh                                      && \
+    sh "${ORACLE_HOME}"/root.sh
 
 # Perform the following actions as the oracle user
 USER oracle
@@ -115,11 +116,12 @@ USER oracle
 VOLUME ["/u02"]
 EXPOSE 1521 5500
 HEALTHCHECK --interval=5m --start-period=10m \
-   CMD ${SCRIPTS_DIR}/healthcheck.sh >/dev/null || exit 1
+   CMD "${SCRIPTS_DIR}"/healthcheck.sh >/dev/null || exit 1
 
 # ------------------------------------------------------------------------------
 # The start script performs all config based on runtime environment variables.
 # First run creates the database.
- CMD exec ${SCRIPTS_DIR}/start.sh
+# CMD exec ${SCRIPTS_DIR}/start.sh
+CMD ["${SCRIPTS_DIR}/start.sh"]
 
 # End
