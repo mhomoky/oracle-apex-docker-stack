@@ -24,12 +24,17 @@ ENV ORACLE_BASE=/u01/app/oracle                                                \
     SOFTWARE_DIR=/u01/software                                                 \
     DB_SOFTWARE="LINUX.X64_193000_db_home.zip"                                 \
     APEX_SOFTWARE="apex_20.2.zip"                                              \
+    OPATCH_UPD="p6880880_190000_Linux-x86-64.zip"                              \
+    DB_REL_UPD_COMBO="p32126828_190000_Linux-x86-64.zip"                       \
+    DB_REL_UPD_PATCH_DIR="32126828/32218454"                                   \
+    DB_JVM_UPD_PATCH_DIR="32126828/32067171"                                   \
+    DB_UPD_CLEANUP="32126828"                                                  \
     ORACLE_PASSWORD="oracle"                                                   \
     SCRIPTS_DIR=/u01/scripts                                                   \
     ORAENV_ASK=NO
 
 # Separate ENV call to allow existing variables to be referenced.
-ENV PATH=${ORACLE_HOME}/bin:${PATH}
+ENV PATH=${ORACLE_HOME}/bin:${ORACLE_HOME}/OPatch:${PATH}
 
 # ------------------------------------------------------------------------------
 # Define config (runtime) environment variables.
@@ -54,7 +59,7 @@ COPY scripts/* ${SCRIPTS_DIR}/
 # high IDs, which causes issues. Note 2 on link below.
 # https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user
 #
-    # yum -y update                                                           && \
+
 RUN groupadd -g 500 dba                                                     && \
     groupadd -g 501 oinstall                                                && \
     groupadd -g 1042 docker_fg                                              && \
@@ -62,10 +67,13 @@ RUN groupadd -g 500 dba                                                     && \
     yum -y install unzip tar gzip                                           && \
     yum -y install oracle-database-preinstall-19c                           && \
     yum clean all                                                           && \
-    rm -Rf /var/cache/yum                                                   && \
-    mkdir -p ${ORACLE_HOME}                                                 && \
-    mkdir -p /u02/oradata                                                   && \
-    chown -R oracle.oinstall /u01                                           && \
+    rm -Rf /var/cache/yum
+
+WORKDIR "${ORACLE_HOME}"
+
+WORKDIR "/u02/oradata"
+
+RUN chown -R oracle.oinstall /u01                                           && \
     chmod u+x ${SCRIPTS_DIR}/*.sh                                           && \
     chown -R oracle:docker_fg /u02                                          && \
     chmod -R 775 /u02                                                       && \
@@ -74,22 +82,22 @@ RUN groupadd -g 500 dba                                                     && \
 # Perform the following actions as the oracle user
 USER oracle
 
-# Unzip software
+# Unzip software and update OPatch
 WORKDIR "${ORACLE_HOME}"
-RUN unzip -oq "${SOFTWARE_DIR}/${DB_SOFTWARE}"                                && \
+RUN unzip -oq "${SOFTWARE_DIR}/${DB_SOFTWARE}"                              && \
     rm -f "${SOFTWARE_DIR}/${DB_SOFTWARE}"
 
 # Do software-only installation
-RUN "${ORACLE_HOME}"/runInstaller -ignorePrereq                                  \
+RUN "${ORACLE_HOME}"/runInstaller -ignorePrereq                                \
     -waitforcompletion -silent                                                 \
-    -responseFile "${ORACLE_HOME}"/install/response/db_install.rsp               \
+    -responseFile "${ORACLE_HOME}"/install/response/db_install.rsp             \
     oracle.install.option=INSTALL_DB_SWONLY                                    \
     ORACLE_HOSTNAME=${HOSTNAME}                                                \
     UNIX_GROUP_NAME=oinstall                                                   \
-    INVENTORY_LOCATION="${ORA_INVENTORY}"                                        \
+    INVENTORY_LOCATION="${ORA_INVENTORY}"                                      \
     SELECTED_LANGUAGES=en,en_GB                                                \
-    ORACLE_HOME="${ORACLE_HOME}"                                                 \
-    ORACLE_BASE="${ORACLE_BASE}"                                                 \
+    ORACLE_HOME="${ORACLE_HOME}"                                               \
+    ORACLE_BASE="${ORACLE_BASE}"                                               \
     oracle.install.db.InstallEdition=EE                                        \
     oracle.install.db.OSDBA_GROUP=dba                                          \
     oracle.install.db.OSBACKUPDBA_GROUP=dba                                    \
@@ -100,18 +108,31 @@ RUN "${ORACLE_HOME}"/runInstaller -ignorePrereq                                 
     DECLINE_SECURITY_UPDATES=true; exit 0
 
 # Replace default APEX software with user-provided version.
-RUN rm -Rf "${ORACLE_HOME}"/apex                                              && \
-    unzip -oqd "${ORACLE_HOME}" "${SOFTWARE_DIR}/${APEX_SOFTWARE}"              && \
+RUN rm -Rf "${ORACLE_HOME}"/apex                                            && \
+    unzip -oqd "${ORACLE_HOME}" "${SOFTWARE_DIR}/${APEX_SOFTWARE}"          && \
     rm "${SOFTWARE_DIR}/${APEX_SOFTWARE}"
+
+# Update OPatch and cleanup
+RUN rm -Rf "${ORACLE_HOME}/OPatch"                                          && \
+    unzip -oqd "${ORACLE_HOME}" "${SOFTWARE_DIR}/${OPATCH_UPD}"             && \
+    rm -f "${SOFTWARE_DIR}/${OPATCH_UPD}"
 
 # Run the root scripts
 USER root
 
-RUN sh "${ORA_INVENTORY}"/orainstRoot.sh                                      && \
+RUN sh "${ORA_INVENTORY}"/orainstRoot.sh                                    && \
     sh "${ORACLE_HOME}"/root.sh
 
 # Perform the following actions as the oracle user
 USER oracle
+
+# Extract Database Release Update, apply and cleanup $ORACLE_HOME/.patch_storage
+RUN unzip -oqd "${SOFTWARE_DIR}" "${SOFTWARE_DIR}/${DB_REL_UPD_COMBO}"      && \
+    rm "${SOFTWARE_DIR}/${DB_REL_UPD_COMBO}"                                && \
+    opatch apply -oh "${ORACLE_HOME}" -silent "${SOFTWARE_DIR}/${DB_REL_UPD_PATCH_DIR}" && \
+    opatch apply -oh "${ORACLE_HOME}" -silent "${SOFTWARE_DIR}/${DB_JVM_UPD_PATCH_DIR}" && \
+    rm -Rf "${SOFTWARE_DIR}/${DB_UPD_CLEANUP}"                              && \
+    opatch util cleanup -oh "${ORACLE_HOME}" -silent -force
 
 VOLUME ["/u02"]
 EXPOSE 1521 5500
@@ -121,7 +142,7 @@ HEALTHCHECK --interval=5m --start-period=10m \
 # ------------------------------------------------------------------------------
 # The start script performs all config based on runtime environment variables.
 # First run creates the database.
-# CMD exec ${SCRIPTS_DIR}/start.sh
-CMD ["${SCRIPTS_DIR}/start.sh"]
+CMD exec "${SCRIPTS_DIR}"/start.sh
+
 
 # End

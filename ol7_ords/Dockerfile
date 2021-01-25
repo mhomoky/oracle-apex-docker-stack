@@ -59,13 +59,13 @@ ENV DB_HOSTNAME="ol7-183.localdomain"                                          \
 # ------------------------------------------------------------------------------
 # Get all the files for the build.
 COPY software/* ${SOFTWARE_DIR}/
-COPY scripts/* ${SCRIPTS_DIR}/
+COPY scripts/* "${SCRIPTS_DIR}"/
 
 # ------------------------------------------------------------------------------
 # Unpack all the software and remove the media.
 # No config done in the build phase.
-RUN sh ${SCRIPTS_DIR}/install_os_packages.sh                                && \
-    sh ${SCRIPTS_DIR}/ords_software_installation.sh
+RUN sh "${SCRIPTS_DIR}"/install_os_packages.sh                                && \
+    sh "${SCRIPTS_DIR}"/ords_software_installation.sh
 
 # Perform the following actions as the tomcat user
 USER tomcat
@@ -73,12 +73,11 @@ USER tomcat
 VOLUME [${CATALINA_BASE}]
 EXPOSE 8080 8443
 HEALTHCHECK --interval=1m --start-period=1m \
-   CMD ${SCRIPTS_DIR}/healthcheck.sh >/dev/null || exit 1
+   CMD "${SCRIPTS_DIR}"/healthcheck.sh >/dev/null || exit 1
 
 # ------------------------------------------------------------------------------
 # The start script performs all config based on runtime environment variables,
 # and starts tomcat.
-# CMD exec ${SCRIPTS_DIR}/start.sh
-CMD ["${SCRIPTS_DIR}/start.sh"]
+CMD exec "${SCRIPTS_DIR}"/start.sh
 
 # End
